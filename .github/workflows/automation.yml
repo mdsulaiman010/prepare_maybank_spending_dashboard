@@ -1,0 +1,33 @@
+name: Prepare Maybank Spending Dashboard
+
+on:
+  schedule:
+    # Runs at 8am every 28th of the month
+    - cron: '0 8 28 * *'                    ### PATTERN: minute | hour | day-of-month | month | day-of-week
+  
+  # Allows manual triggering
+  workflow_dispatch:  
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run automation
+      run: python prepare_maybank_spending_dashboard.py
+      env:
+        # Add any environment variables/secrets your script needs
+        API_KEY: ${{ secrets.API_KEY }}
