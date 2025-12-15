@@ -22,7 +22,7 @@ jobs:
         python-version: '3.11'
 
     - name: Setup credentials
-      run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service_account.json
+      run: echo '${{ secrets.GOOGLE_SERVICE_ACC_CREDENTIALS }}' > service_account.json
 
     - name: Install dependencies
       run: |
