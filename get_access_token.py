@@ -16,7 +16,7 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 
-credentials_JSON = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+# credentials_JSON = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
 
 # def get_credentials():
 #     """Gets valid user credentials from storage or initiates authorization flow."""
