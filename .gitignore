@@ -1,0 +1,4 @@
+.env
+token.pickle
+prompt_template.txt
+*.ipynb
