@@ -34,3 +34,4 @@ jobs:
       env:
         # Add any environment variables/secrets your script needs
         maybank_stmt_pw: ${{ secrets.maybank_stmt_pw }}
+        GOOGLE_APPLICATION_CREDENTIALS: service_account.json
