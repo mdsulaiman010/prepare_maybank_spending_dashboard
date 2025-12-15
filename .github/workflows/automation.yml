@@ -30,4 +30,4 @@ jobs:
       run: python prepare_maybank_spending_dashboard.py
       env:
         # Add any environment variables/secrets your script needs
-        API_KEY: ${{ secrets.API_KEY }}
+        maybank_stmt_pw: ${{ secrets.maybank_stmt_pw }}
