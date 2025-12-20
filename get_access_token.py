@@ -16,36 +16,36 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 
-credentials_JSON = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+credentials_JSON = os.environ['GOOGLE_USER_API_CREDENTIALS']
 
-def get_credentials():
-    """Gets valid user credentials from storage or initiates authorization flow."""
-    creds = None
-    token_path = 'token.pickle'
+# def get_credentials():
+#     """Gets valid user credentials from storage or initiates authorization flow."""
+#     creds = None
+#     token_path = 'token.pickle'
     
-    # Load existing credentials
-    if os.path.exists(token_path):
-        with open(token_path, 'rb') as token:
-            creds = pickle.load(token)
+#     # Load existing credentials
+#     if os.path.exists(token_path):
+#         with open(token_path, 'rb') as token:
+#             creds = pickle.load(token)
     
-    # If credentials don't exist or are invalid, refresh or get new ones
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            # Refresh the access token using the refresh token
-            print("Refreshing access token...")
-            creds.refresh(Request())
-        else:
-            # Run the OAuth flow to get new credentials
-            print("Getting new credentials...")
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_JSON, SCOPES)
-            creds = flow.run_local_server(port=0)
+#     # If credentials don't exist or are invalid, refresh or get new ones
+#     if not creds or not creds.valid:
+#         if creds and creds.expired and creds.refresh_token:
+#             # Refresh the access token using the refresh token
+#             print("Refreshing access token...")
+#             creds.refresh(Request())
+#         else:
+#             # Run the OAuth flow to get new credentials
+#             print("Getting new credentials...")
+#             flow = InstalledAppFlow.from_client_secrets_file(
+#                 credentials_JSON, SCOPES)
+#             creds = flow.run_local_server(port=0)
         
-        # Save credentials for future use
-        with open(token_path, 'wb') as token:
-            pickle.dump(creds, token)
+#         # Save credentials for future use
+#         with open(token_path, 'wb') as token:
+#             pickle.dump(creds, token)
     
-    return creds    # can extract client ID, client secret and refresh token from this
+#     return creds    # can extract client ID, client secret and refresh token from this
 
 # def get_credentials():
 #     """Gets credentials using service account."""
@@ -72,11 +72,19 @@ def get_access_token(client_id, client_secret, refresh_token):
     return tokens['access_token']
 
 
-# # # NOTE: run this code to update token with new scopes. Download JSON file from google developer console
-# flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-# creds = flow.run_local_server(port=0)
+# def reset_credentials():
+#     # NOTE: run this code to update token with new scopes. Download JSON file from google developer console
+#     flow = InstalledAppFlow.from_client_secrets_file(credentials_JSON, SCOPES)
+#     creds = flow.run_local_server(port=0, access_type='offline', prompt='consent')
+    
+#     print(f'Client ID: {creds.client_id}\n')
+#     print(f'Client Secret: {creds.client_secret}\n')
+#     print(f'Refresh Token: {creds.refresh_token}\n')
 
-# print(creds.refresh_token)
+# reset_credentials()
+
+
+
 
 # # Function to retrieve access token for Gmail API
 # def get_access_token(client_secret_file, api_name, api_version, *scopes):

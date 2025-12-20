@@ -25,7 +25,7 @@ API_VERSION = 'v1'
 SCOPES = ['https://mail.google.com/']
 
 proxy_ip = os.environ['PROXY_IP']   
-credentials_dir = os.environ['GOOGLE_CREDENTIALS_DIR']
+credentials_dir = os.environ['CREDENTIALS_DIR']
 downloads_dir = os.environ['DOWNLOAD_DIR']
 
 credentials = pd.read_excel(credentials_dir, sheet_name = 'credentials')

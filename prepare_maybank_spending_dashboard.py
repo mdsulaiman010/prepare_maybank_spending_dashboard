@@ -21,7 +21,7 @@ max_retries = 5
 
 # Define relevant credentials 
 download_dir = os.environ['DOWNLOAD_DIR']
-credentials_dir = os.environ['GOOGLE_CREDENTIALS_DIR']
+credentials_dir = os.environ['CREDENTIALS_DIR']
 credentials = pd.read_excel(credentials_dir)
 statement_pw = os.environ['maybank_stmt_pw']
 
@@ -70,7 +70,6 @@ else:
                     time.sleep(2)
                 else:
                     raise
-
 
         # Decrypt document password
         if reader.is_encrypted:
