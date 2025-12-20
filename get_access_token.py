@@ -72,46 +72,14 @@ def get_access_token(client_id, client_secret, refresh_token):
     return tokens['access_token']
 
 
-# def reset_credentials():
-#     # NOTE: run this code to update token with new scopes. Download JSON file from google developer console
-#     flow = InstalledAppFlow.from_client_secrets_file(credentials_JSON, SCOPES)
-#     creds = flow.run_local_server(port=0, access_type='offline', prompt='consent')
+def reset_credentials():
+    # NOTE: run this code to update token with new scopes. Download JSON file from google developer console
+    flow = InstalledAppFlow.from_client_secrets_file(credentials_JSON, SCOPES)
+    creds = flow.run_local_server(port=0, access_type='offline', prompt='consent')
     
-#     print(f'Client ID: {creds.client_id}\n')
-#     print(f'Client Secret: {creds.client_secret}\n')
-#     print(f'Refresh Token: {creds.refresh_token}\n')
-
-# reset_credentials()
-
-
-
-
-# # Function to retrieve access token for Gmail API
-# def get_access_token(client_secret_file, api_name, api_version, *scopes):
-#     SCOPES = [scope for scope in scopes[0]]
-
-#     # Initialize credentials and pickle file path to store access token
-#     credentials = None
-#     pickle_file = f'token_{api_name}_{api_version}.pickle'
-
-#     # If credentials pickle file exists, overwrite initialized credentials with pickle file contents
-#     if os.path.exists(pickle_file):
-#         with open(pickle_file, 'rb') as token:
-#             credentials = pickle.load(token)
-    
-#     # Refresh token for API requests
-#     if not credentials or not credentials.valid:
-#         if credentials and credentials.expired and credentials.refresh_token:
-#             credentials.refresh(Request())
-#         else:
-#             flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, SCOPES)
-#             credentials = flow.run_local_server()
-
-#         # Create new credentials pickle file with latest token
-#         with open(pickle_file, 'wb') as token:
-#             pickle.dump(credentials, token)
-
-#     return credentials.token
+    print(f'Client ID: {creds.client_id}\n')
+    print(f'Client Secret: {creds.client_secret}\n')
+    print(f'Refresh Token: {creds.refresh_token}\n')
 
 def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):
     dt = datetime(year, month, day, hour, minute, 0).isoformat() + 'Z'
