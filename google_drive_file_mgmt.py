@@ -175,7 +175,7 @@ def google_drive_list_files(foldername, drivename=None, search_string=None):
         available_folders = [item['name'] for item in files_result]
         return available_folders
     else:
-        print(f'No existing folders found within "{foldername}" folder')
+        print(f'No existing files found within "{foldername}" folder')
         return []
 
 def google_drive_add_folder(foldername, drivename=None):
