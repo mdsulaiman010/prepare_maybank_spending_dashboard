@@ -40,12 +40,6 @@ if maybank_df.empty:
 else:
     move_emails(sender_email, maybank_df['Id'].to_list(), ['MayBank'], ['INBOX'])
 
-maybank_df = retrieve_gmail_body(sender_email, today, 32, ['INBOX'], True, email_filter=relevant_maybank_emails)
-if maybank_df.empty:
-    print('No new emails found to move.')
-else:
-    move_emails(sender_email, maybank_df['Id'].to_list(), ['MayBank'], ['INBOX'])
-
 # Download monthly statement
 statement_files = retrieve_gmail_attachments(sender_email, today, 32, 'MayBank', subject_filter=["Savings Account Statement "])
 
@@ -97,9 +91,6 @@ else:
 
             month_number = int(statement_month)
             month_name = calendar.month_name[month_number]
-
-            statements_foldername = f'{statement_year} Debit Statements'
-            statements_gdrive_folderpath = f'{root_folder}/{statements_foldername}'
 
             # Decrypt document password
             if reader.is_encrypted:
@@ -184,7 +175,7 @@ else:
 
     files_to_upload = glob.glob(os.path.join(download_dir, r'* Compiled Debit Statements.xlsx'))
 
-    document_link = google_drive_get_link(statements_gdrive_folderpath)
+    document_link = google_drive_get_link(root_folder)
 
     for file in files_to_upload:
         for i in range(max_retries):
