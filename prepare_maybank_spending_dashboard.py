@@ -27,7 +27,7 @@ os.makedirs(download_dir, exist_ok=True)
 sender_email = os.environ['EMAIL']
 statement_pw = os.environ['MAYBANK_STMT_PW']
 
-root_folder = 'SULAIMAN FINANCING'
+root_folder = 'JULIE FINANCING'
 
 # List of relevant email addresses from Maybank
 relevant_maybank_emails = ['m2u@maybank.com.my', "m2u@bills.maybank2u.com.my", "m2u@stmts.maybank2u.com.my", 'maybankard@edm.maybank2u.com.my']
