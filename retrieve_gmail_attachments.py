@@ -23,7 +23,6 @@ from dotenv import load_dotenv
 # Load in directory-specific environem
 load_dotenv()
 
-credentials_dir = os.environ['CREDENTIALS_DIR']
 downloads_dir = os.environ.get('DOWNLOAD_DIR', os.path.join(os.getcwd(), 'Downloads'))
 user_gmail = os.environ['EMAIL']
 access_token = get_access_token(user_gmail)
