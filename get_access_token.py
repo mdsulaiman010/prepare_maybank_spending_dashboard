@@ -17,7 +17,7 @@ SCOPES = [
     'https://www.googleapis.com/auth/calendar'
 ]
 
-google_JSON_credentials = os.environ['GOOGLE_USER_API_CREDENTIALS']
+google_JSON_credentials = os.environ.get('GOOGLE_USER_API_CREDENTIALS', '')
 # credentials_dir = os.environ['CREDENTIALS_DIR']
 # refresh_token_dir = os.environ['GOOGLE_REFRESH_TOKEN_DIR']
 
