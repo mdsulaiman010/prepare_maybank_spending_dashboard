@@ -3,10 +3,10 @@ from datetime import datetime
 from relocate_emails_to_folders import move_emails, list_all_folders
 from retrieve_gmail_attachments import retrieve_gmail_attachments
 from retrieve_gmail_body import retrieve_gmail_body
-from pypdf import PdfReader
-import os
 from google_drive_file_mgmt import google_drive_add_folder, google_drive_upload_file, google_drive_get_link
 from send_gmail_message import send_email_gmail
+from pypdf import PdfReader
+import os
 import re
 import time
 import calendar
@@ -19,16 +19,15 @@ today = datetime.today()
 current_year = today.year
 max_retries = 5
 
-# Define relevant credentials 
-download_dir = os.environ['DOWNLOAD_DIR']
-credentials_dir = os.environ['CREDENTIALS_DIR']
-credentials = pd.read_excel(credentials_dir)
+# Create Downloads local directory
+download_dir = os.path.join(os.getcwd(), 'Downloads')
+os.makedirs(download_dir, exist_ok=True)
+
+# Define relevant credentials
+sender_email = os.environ['email']
 statement_pw = os.environ['maybank_stmt_pw']
 
-# Define relevant email sender and recipients
-sender_email = credentials.loc[credentials['application'] == 'gmail', 'username'].values[0]
-
-root_folder = 'JULIE FINANCING'
+root_folder = 'SULAIMAN FINANCING'
 
 # List of relevant email addresses from Maybank
 relevant_maybank_emails = ['m2u@maybank.com.my', "m2u@bills.maybank2u.com.my", "m2u@stmts.maybank2u.com.my", 'maybankard@edm.maybank2u.com.my']
@@ -41,7 +40,7 @@ else:
     move_emails(sender_email, maybank_df['Id'].to_list(), ['MayBank'], ['INBOX'])
 
 # Download monthly statement
-statement_files = retrieve_gmail_attachments('mdsulaiman010@gmail.com', today, 32, 'MayBank', subject_filter=["Savings Account Statement "])
+statement_files = retrieve_gmail_attachments(sender_email, today, 32, 'MayBank', subject_filter=["Savings Account Statement "])
 
 if len(statement_files) == 0:
     print('No MayBank statements found this month.')

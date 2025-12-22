@@ -15,8 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Load in 
-credentials_dir = os.environ['CREDENTIALS_DIR']
-downloads_dir = os.environ['DOWNLOAD_DIR']
+downloads_dir = os.environ.get('DOWNLOAD_DIR', os.path.join(os.getcwd(), 'Downloads'))
 user_gmail = os.environ['email']
 
 access_token = get_access_token(user_gmail)

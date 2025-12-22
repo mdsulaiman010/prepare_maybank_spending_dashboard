@@ -15,7 +15,6 @@ from dotenv import load_dotenv
 # Load in directory-specific environem
 load_dotenv()
 
-credentials_dir = os.environ['CREDENTIALS_DIR']
 user_gmail = os.environ['email']
 
 access_token = get_access_token(user_gmail)
