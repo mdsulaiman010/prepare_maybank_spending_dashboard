@@ -223,7 +223,7 @@ else:
 
             for i in range(max_retries):
                 try:
-                    send_email_gmail('mdsulaiman010@gmail.com', ['mdsulaiman010@gmail.com'], [], [], email_subject, email_body, '', [])
+                    send_email_gmail(sender_email, [sender_email], [], [], email_subject, email_body, '', [])
                     break
                 except Exception as e:
                     if i < max_retries - 1:
