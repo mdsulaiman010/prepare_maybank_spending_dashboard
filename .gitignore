@@ -3,4 +3,5 @@ token.pickle
 prompt_template.txt
 *.ipynb
 service_account.json
-/automations_venv/
+/*venv/
+secrets.db
