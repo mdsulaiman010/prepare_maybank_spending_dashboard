@@ -40,9 +40,18 @@ if maybank_df.empty:
 else:
     move_emails(sender_email, maybank_df['Id'].to_list(), ['MayBank'], ['INBOX'])
 
-    # Download monthly statement
-    statement_files = retrieve_gmail_attachments(sender_email, today, 365, 'MayBank', subject_filter=["Savings Account Statement "])
+maybank_df = retrieve_gmail_body(sender_email, today, 32, ['INBOX'], True, email_filter=relevant_maybank_emails)
+if maybank_df.empty:
+    print('No new emails found to move.')
+else:
+    move_emails(sender_email, maybank_df['Id'].to_list(), ['MayBank'], ['INBOX'])
 
+# Download monthly statement
+statement_files = retrieve_gmail_attachments(sender_email, today, 32, 'MayBank', subject_filter=["Savings Account Statement "])
+
+if len(statement_files) == 0:
+    print('No MayBank statements found this month.')
+else:
     retrieved_years = list({file.split('_')[1][0:4] for file in statement_files})
     retrieved_monthYears = [file.split('_')[1][0:6] for file in statement_files]
 
