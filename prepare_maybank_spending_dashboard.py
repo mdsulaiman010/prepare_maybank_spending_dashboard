@@ -233,8 +233,6 @@ else:
                         print('All attempts failed.')
                         raise e
         
-        
-
 # Remove already-processed files
 for file in statement_files:
     if os.path.exists(os.path.join(download_dir, file)):
