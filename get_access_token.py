@@ -18,26 +18,50 @@ SCOPES = [
 ]
 
 google_JSON_credentials = os.environ['GOOGLE_USER_API_CREDENTIALS']
-credentials_dir = os.environ['CREDENTIALS_DIR']
-refresh_token_dir = os.environ['GOOGLE_REFRESH_TOKEN_DIR']
+# credentials_dir = os.environ['CREDENTIALS_DIR']
+# refresh_token_dir = os.environ['GOOGLE_REFRESH_TOKEN_DIR']
 
-def _get_clientID_and_clientSecret():
-    credentials = pd.read_excel(credentials_dir, sheet_name = 'credentials')
-    client_id = credentials[credentials['application']=='google_client_id']['username'].values[0]
-    client_secret = credentials[credentials['application']=='google_client_secret']['username'].values[0]
+# NOTE: Alternative use on local/VM-based scripts
+# def _get_clientID_and_clientSecret():
+#     credentials = pd.read_excel(credentials_dir, sheet_name = 'credentials')
+#     client_id = credentials[credentials['application']=='google_client_id']['username'].values[0]
+#     client_secret = credentials[credentials['application']=='google_client_secret']['username'].values[0]
 
-    return client_id, client_secret
+#     return client_id, client_secret
 
-def _get_refreshToken_by_user(email: str):
-    refresh_tokens_df = pd.read_excel(refresh_token_dir, sheet_name = 'refresh_tokens')
-    refresh_token = refresh_tokens_df[refresh_tokens_df['gmail'] == email]['refresh_token'].values[0]
-    return refresh_token
+# def _get_refreshToken_by_user(email: str):
+#     refresh_tokens_df = pd.read_excel(refresh_token_dir, sheet_name = 'refresh_tokens')
+#     refresh_token = refresh_tokens_df[refresh_tokens_df['gmail'] == email]['refresh_token'].values[0]
+#     return refresh_token
+
+def _get_clientID_and_clientSecret(conn):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT client_id, client_secret
+        FROM clients
+        WHERE provider = 'google'
+        LIMIT 1
+    """)
+    return cur.fetchone()
+
+def _get_refreshToken_by_user(conn, email: str):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT refresh_token
+        FROM users
+        WHERE username = ?
+    """, (email,))
+    return cur.fetchone()[0]
 
 def get_access_token(email):
     token_url = 'https://oauth2.googleapis.com/token'
 
-    client_id, client_secret = _get_clientID_and_clientSecret()
-    refresh_token = _get_refreshToken_by_user(email)
+    # Connect to SQLite DB
+    conn = sqlite3.connect("secrets.db")
+
+    # Retrieve relevant credentials by user and platform as Google
+    client_id, client_secret = _get_clientID_and_clientSecret(conn)
+    refresh_token = _get_refreshToken_by_user(conn, email)
 
     data = {
         'client_id': client_id,
