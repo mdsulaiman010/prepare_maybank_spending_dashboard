@@ -32,7 +32,7 @@ jobs:
         DB_DECRYPTION_KEY: ${{ secrets.DB_DECRYPTION_KEY }}
 
     - name: Run automation
-      run: python prepare_maybank_spending_dashboard.py
+      run: python consolidate_maybank_debit_statements.py # prepare_maybank_spending_dashboard.py
       env:
         EMAIL: ${{ secrets.EMAIL }}
         MAYBANK_STMT_PW: ${{ secrets.MAYBANK_STMT_PW }}
