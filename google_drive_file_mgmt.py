@@ -16,7 +16,7 @@ load_dotenv()
 
 # Load in 
 downloads_dir = os.environ.get('DOWNLOAD_DIR', os.path.join(os.getcwd(), 'Downloads'))
-user_gmail = os.environ['email']
+user_gmail = os.environ['EMAIL']
 
 access_token = get_access_token(user_gmail)
 

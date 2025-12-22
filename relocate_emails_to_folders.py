@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 # Load in directory-specific environem
 load_dotenv()
 
-user_gmail = os.environ['email']
+user_gmail = os.environ['EMAIL']
 
 base_url = 'https://gmail.googleapis.com/gmail/v1/users/'
 
