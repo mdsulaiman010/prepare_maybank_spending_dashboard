@@ -17,29 +17,21 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import base64
-from get_access_token import get_credentials, get_access_token
+from get_access_token import get_access_token
+from dotenv import load_dotenv
 
-CLIENT_SECRET_FILE = 'client_secret.json'
-API_NAME = 'gmail'
-API_VERSION = 'v1'
-SCOPES = ['https://mail.google.com/']
+# Load in directory-specific environem
+load_dotenv()
 
-proxy_ip = os.environ['PROXY_IP']   
 credentials_dir = os.environ['CREDENTIALS_DIR']
-
-credentials = pd.read_excel(credentials_dir, sheet_name = 'credentials')
-client_id = credentials[credentials['application']=='google_client_id']['username'].values[0]
-client_secret = credentials[credentials['application']=='google_client_secret']['username'].values[0]
-refresh_token = credentials[credentials['application']=='google_refresh_token']['username'].values[0]
+downloads_dir = os.environ['DOWNLOAD_DIR']
+user_gmail = os.environ['email']
+access_token = get_access_token(user_gmail)
 
 base_url = 'https://gmail.googleapis.com/gmail/v1/users/'
+headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
 
 def list_email_message_ids(user_id, current_date, days_lookback = None, label_ids: str|list = None, filter_query = None, include_spam_trash_boxes = False, max_results: int = 500):
-    creds = get_credentials()
-    client_id, client_secret, refresh_token = creds.client_id, creds.client_secret, creds.refresh_token
-    access_token = get_access_token(client_id, client_secret, refresh_token)
-    headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
-    
     messages_list = []
 
     url = f'{base_url}{user_id}/messages'
@@ -127,9 +119,9 @@ def extract_email_body(payload, parse_method='text'):
     return body or f"[No {parse_method} body found]"
 
 
-def retrieve_gmail_body(user_id, current_date, days_lookback = None, label_ids = None, return_message_id = False, parse_method = 'text', subject_filter = [], email_filter = [], include_spam_trash_boxes = False):
+def retrieve_gmail_attachments(user_id, current_date, days_lookback = None, label_ids = None, subject_filter = [], email_filter = [], include_spam_trash_boxes = False):
     """
-    Function to retrieve emails in specific mailing location and restrict according to conditions
+    Function to retrieve email attachments in specific mailing location and restrict according to conditions
 
     user_id: str
         User's email address
@@ -155,11 +147,6 @@ def retrieve_gmail_body(user_id, current_date, days_lookback = None, label_ids =
     include_spam_trash_boxes: bool
         Whether to list out emails from the Spam and Trash mailboxes
     """
-    creds = get_credentials()
-    client_id, client_secret, refresh_token = creds.client_id, creds.client_secret, creds.refresh_token
-    access_token = get_access_token(client_id, client_secret, refresh_token)
-    headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
-
     full_filter_query = ''
 
     # Filter emails by sender email if list not empty
@@ -186,13 +173,9 @@ def retrieve_gmail_body(user_id, current_date, days_lookback = None, label_ids =
     # Filter all emails that meet passed criteria
     messages_list = list_email_message_ids(user_id=user_id, current_date=current_date, days_lookback=days_lookback, label_ids=label_ids, include_spam_trash_boxes=include_spam_trash_boxes, filter_query=full_filter_query)
 
-    # Initialize dataframe to store all email details 
-    df = pd.DataFrame()
+    downloaded_files = []
 
-    # Define MIME target (whether to parse content as text or html)
-    mime_target = 'text/plain' if parse_method == 'text' else 'text/html'
-
-    for i, message in enumerate(messages_list):
+    for _, message in enumerate(messages_list):
 
         url = f"{base_url}{user_id}/messages/{message['id']}"
         
@@ -203,91 +186,71 @@ def retrieve_gmail_body(user_id, current_date, days_lookback = None, label_ids =
         except Exception as e:
             raise e
 
-        message_id = message_metadata['id']
+        ids = message_id = message_metadata['id']
+        parts = message_metadata['payload'].get('parts', [])
+        for id, part in zip(ids, parts):
+            filename = part.get("filename")
+            body = part.get("body", {})
+            attachment_id = body.get("attachmentId")
+            message_id = message_metadata['id']
 
-        message_headers = message_metadata['payload']['headers']
-        content = extract_email_body(message_metadata['payload'], parse_method)
-        # content = ''
+            if filename and attachment_id:
+                attachment_url = f"{base_url}{user_id}/messages/{message_id}/attachments/{attachment_id}"
+                attachment_response = requests.get(attachment_url, headers=headers)
 
-        # if 'parts' in message_metadata['payload']:
-        #     message_main_content = message_metadata['payload']['parts']
-            
-        #     for part in message_main_content:
-        #         if 'parts' in part:
-        #             for item in part['parts']:
-        #                 content += base64.urlsafe_b64decode(item['body']['data']).decode('utf-8')
-        #                 content += '\n\n'
+                if attachment_response.status_code == 200:
+                    attachment_data = attachment_response.json().get('data')
+                    if attachment_data:
+                        attachment_bytes = base64.urlsafe_b64decode(attachment_data.encode('UTF-8'))
+                        file_path = os.path.join(downloads_dir, filename)
 
-        #         elif part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
-        #             content += base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
-        #             content += '\n\n'
+                        with open(file_path, 'wb') as f:
+                            f.write(attachment_bytes)
 
-        # elif 'body' in message_metadata['payload']:
-        #     message_main_content = message_metadata['payload']['body']
+                        print(f"Downloaded: {filename} -> {file_path}")
+                        downloaded_files.append(filename)
 
-        #     content += base64.urlsafe_b64decode(message_main_content['data']).decode('utf-8')
-        #     content += '\n\n'
+    return downloaded_files
 
 
-        sender_email = [header['value'] for header in message_headers if header['name'].lower()=='from'][0]
-        message_subject = [header['value'] for header in message_headers if header['name'].lower()=='subject'][0]
-        date_received = [header['value'] for header in message_headers if header['name'].lower() == 'date'][0]
-        cleaned_date = date_received.split(' (')[0].strip()
 
-        # Normalize timezone names to numeric if needed
-        for name, offset in {"GMT": "+0000", "UTC": "+0000"}.items():
-            if cleaned_date.endswith(name):
-                cleaned_date = cleaned_date.replace(name, offset)
 
-        # Robust parsing
-        try:
-            dt = parsedate_to_datetime(cleaned_date)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=ZoneInfo("UTC"))
-            dt_myt = dt.astimezone(ZoneInfo("Asia/Kuala_Lumpur"))
-            myt_date_received = dt_myt.strftime('%Y-%m-%d %H:%M:%S')
 
-        except Exception as e:
-            print("Parsing failed for:", cleaned_date, "Error:", e)
-            myt_date_received = "Invalid date"
+    #     message_headers = message_metadata['payload']['headers']
+    #     content = extract_email_body(message_metadata['payload'], parse_method)
+
+    #     sender_email = [header['value'] for header in message_headers if header['name'].lower()=='from'][0]
+    #     message_subject = [header['value'] for header in message_headers if header['name'].lower()=='subject'][0]
+    #     date_received = [header['value'] for header in message_headers if header['name'].lower() == 'date'][0]
+    #     cleaned_date = date_received.split(' (')[0].strip()
+
+    #     # Normalize timezone names to numeric if needed
+    #     for name, offset in {"GMT": "+0000", "UTC": "+0000"}.items():
+    #         if cleaned_date.endswith(name):
+    #             cleaned_date = cleaned_date.replace(name, offset)
+
+    #     # Robust parsing
+    #     try:
+    #         dt = parsedate_to_datetime(cleaned_date)
+    #         if dt.tzinfo is None:
+    #             dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    #         dt_myt = dt.astimezone(ZoneInfo("Asia/Kuala_Lumpur"))
+    #         myt_date_received = dt_myt.strftime('%Y-%m-%d %H:%M:%S')
+
+    #     except Exception as e:
+    #         print("Parsing failed for:", cleaned_date, "Error:", e)
+    #         myt_date_received = "Invalid date"
         
+    #     if return_message_id:
+    #         row_df = pd.DataFrame([[message_id, myt_date_received, sender_email, message_subject, content]], 
+    #                             columns = ['Id', 'Date Recieved', 'Sender Email', 'Subject', 'Body'])
         
-        
-        
-        # date_recieved = [header['value'] for header in message_headers if header['name'].lower()=='date'][0]
-
-        # cleaned_date = date_recieved.split(' (')[0]
-
-        # # Determine what string format to use in extracting date components
-        # if ',' in cleaned_date:
-        #     date_format = "%a, %d %b %Y %H:%M:%S %Z"
-        # elif '+' in cleaned_date or '-' in cleaned_date:
-        #     date_format = "%d %b %Y %H:%M:%S %z"
-        # else:
-        #     date_format = "%d %b %Y %H:%M:%S %Z"
-
-        # dt = datetime.strptime(cleaned_date, date_format)  # Parse with timezone
-        # dt_myt = dt.astimezone(ZoneInfo("Asia/Kuala_Lumpur"))  # Convert to MYT
-        # myt_date_recieved = dt_myt.strftime('%Y-%m-%d %H:%M:%S')
-
-        if return_message_id:
-            row_df = pd.DataFrame([[message_id, myt_date_received, sender_email, message_subject, content]], 
-                                columns = ['Id', 'Date Recieved', 'Sender Email', 'Subject', 'Body'])
-        
-        else:
-            row_df = pd.DataFrame([[myt_date_received, sender_email, message_subject, content]], 
-                                columns = ['Date Recieved', 'Sender Email', 'Subject', 'Body'])
+    #     else:
+    #         row_df = pd.DataFrame([[message_id, myt_date_received, sender_email, message_subject, content]], 
+    #                             columns = ['Date Recieved', 'Sender Email', 'Subject', 'Body'])
             
 
-        df = pd.concat([df, row_df], axis=0, ignore_index=True)
-        print(f"{dt_myt.strftime('%d%m%Y - %H%M%S')} | {message_subject}")
+    #     df = pd.concat([df, row_df], axis=0, ignore_index=True)
+    #     print(f"{dt_myt.strftime('%d%m%Y - %H%M%S')} | {message_subject}")
 
-    return df # messages_list
-
-    
-
-    
-
-
-
-
+    # return df # messages_list

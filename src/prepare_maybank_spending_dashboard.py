@@ -28,7 +28,7 @@ statement_pw = os.environ['maybank_stmt_pw']
 # Define relevant email sender and recipients
 sender_email = credentials.loc[credentials['application'] == 'gmail', 'username'].values[0]
 
-root_folder = 'SULAIMAN FINANCING'
+root_folder = 'JULIE FINANCING'
 
 # List of relevant email addresses from Maybank
 relevant_maybank_emails = ['m2u@maybank.com.my', "m2u@bills.maybank2u.com.my", "m2u@stmts.maybank2u.com.my", 'maybankard@edm.maybank2u.com.my']

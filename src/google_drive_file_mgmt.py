@@ -8,32 +8,18 @@ import json
 import os
 import base64
 import requests
-from get_access_token import get_credentials, get_access_token
+from get_access_token import get_access_token
+from dotenv import load_dotenv
 
-CLIENT_SECRET_FILE = 'client_secret.json'
-API_NAME = 'gdrive'
-API_VERSION = 'v1'
-SCOPES = [
-    'https://mail.google.com/',  # Gmail full read/write/send/delete
-    'https://www.googleapis.com/auth/drive',  # Drive full CRUD
-    'https://www.googleapis.com/auth/spreadsheets',  # Google Sheets CRUD
-    'https://www.googleapis.com/auth/documents',  # Google Docs CRUD
-    'https://www.googleapis.com/auth/presentations',  # Google Slides CRUD
-    'https://www.googleapis.com/auth/calendar'  # Google Calendar full CRUD
-]
+# Load in directory-specific environem
+load_dotenv()
 
-# proxy_ip = os.environ['PROXY_IP']   
+# Load in 
 credentials_dir = os.environ['CREDENTIALS_DIR']
 downloads_dir = os.environ['DOWNLOAD_DIR']
+user_gmail = os.environ['email']
 
-credentials = pd.read_excel(credentials_dir, sheet_name = 'credentials')
-client_id = credentials[credentials['application']=='google_client_id']['username'].values[0]
-client_secret = credentials[credentials['application']=='google_client_secret']['username'].values[0]
-refresh_token = credentials[credentials['application']=='google_refresh_token']['username'].values[0]
-
-creds = get_credentials()
-client_id, client_secret, refresh_token = creds.client_id, creds.client_secret, creds.refresh_token
-access_token = get_access_token(client_id, client_secret, refresh_token)
+access_token = get_access_token(user_gmail)
 
 def get_drive_id(drivename, access_token):
     # Retrieve drive IDs and names associated with a site
