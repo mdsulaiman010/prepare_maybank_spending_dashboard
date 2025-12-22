@@ -24,8 +24,8 @@ download_dir = os.path.join(os.getcwd(), 'Downloads')
 os.makedirs(download_dir, exist_ok=True)
 
 # Define relevant credentials
-sender_email = os.environ['email']
-statement_pw = os.environ['maybank_stmt_pw']
+sender_email = os.environ['EMAIL']
+statement_pw = os.environ['MAYBANK_STMT_PW']
 
 root_folder = 'SULAIMAN FINANCING'
 
